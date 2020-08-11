@@ -88,9 +88,46 @@ class Employee {
         this.role_id = role_id;
     };
     addEmployeeDB() {
-        connection.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)",[this.first_name, this.last_name, this.role_id, this.manager_id],function(err, res) {
+        connection.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)",[this.first_name, this.last_name, this.role_id, this.manager_id],(err, res) => {
             if (err) throw err;
             console.log(res)
         })
     }
+};
+
+function addNewRole() {
+    inquirer.prompt([
+        {
+            type: "prompt",
+            name: "role_desc",
+            message: "What role would you like to add?",
+        },
+        {
+            type: "prompt",
+            name: "salary",
+            message: "What is the salary for this role?"
+        },
+        {
+            type: "prompt",
+            name: "dept_id",
+            message: "What is the department ID?"
+        }
+    ]).then((answers) => {
+        let newRole = new Role(answers.role_desc, answers.salary, answers.dept_id)
+        newRole.addRoleDB()
+    });
+};
+
+class Role {
+    constructor(role_desc, salary, dept_id) {
+        this.role_desc = role_desc;
+        this.salary = salary;
+        this.dept_id = dept_id;
+    };
+    addRoleDB() {
+        connection.query("INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)",[this.role_desc, this.salary, this.dept_id],(err,res) => {
+            if (err) throw err;
+            console.log(res)
+        });
+    };
 };
