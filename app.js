@@ -36,9 +36,7 @@ function startQuestions() {
                 message: "What would you like to add?",
                 choices: ["NEW EMPLOYEE", "NEW DEPARTMENT", "NEW ROLE"]
             }).then((resp) => {
-                console.log(resp)
                 if (resp.record_add === "NEW EMPLOYEE") {
-                    console.log('into new employee')
                     addNewEmployee()
                 } else if (resp.record_add === "NEW DEPARTMENT") {
                     addNewDept()
@@ -91,30 +89,33 @@ class Employee {
         connection.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)",[this.first_name, this.last_name, this.role_id, this.manager_id],(err, res) => {
             if (err) throw err;
             console.log(res)
-        })
-    }
+        });
+    };
 };
 
 function addNewRole() {
-    inquirer.prompt([
-        {
-            type: "prompt",
-            name: "role_desc",
-            message: "What role would you like to add?",
-        },
-        {
-            type: "prompt",
-            name: "salary",
-            message: "What is the salary for this role?"
-        },
-        {
-            type: "prompt",
-            name: "dept_id",
-            message: "What is the department ID?"
-        }
-    ]).then((answers) => {
-        let newRole = new Role(answers.role_desc, answers.salary, answers.dept_id)
-        newRole.addRoleDB()
+    getRoles("department_id", "role").then((respp) => {
+        inquirer.prompt([
+            {
+                type: "prompt",
+                name: "role_desc",
+                message: "What role would you like to add?",
+            },
+            {
+                type: "prompt",
+                name: "salary",
+                message: "What is the salary for this role?"
+            },
+            {
+                type: "list",
+                name: "dept_id",
+                message: "What is the department ID?",
+                choices: respp
+            }
+        ]).then((answers) => {
+            let newRole = new Role(answers.role_desc, answers.salary, answers.dept_id)
+            newRole.addRoleDB()
+        });
     });
 };
 
@@ -130,4 +131,46 @@ class Role {
             console.log(res)
         });
     };
+};
+
+function addNewDept() {
+    inquirer.prompt([
+        {
+            type: "prompt",
+            name: "dept_name",
+            message: "What is the department name?"
+        }
+    ]).then((answers) => {
+        let newDept = new Department(answers.dept_name)
+        newDept.addDeptDB()
+    });
+};
+
+class Department {
+    constructor(dept_name) {
+        this.dept_name = dept_name;
+    };
+    addDeptDB() {
+        connection.query("INSERT INTO department (name) VALUES (?)",[this.dept_name],(err,res) => {
+            if (err) throw err;
+            console.log(res)
+        });
+    };
+};
+
+getRoles = function(select, table) {
+    return new Promise((resolve, reject) => {
+        let retArr = []
+        connection.query(`SELECT ${select} FROM ${table}`, (err, res) => {
+            console.log(res)
+            if (err) {
+                reject(new Error(err))
+            } else {
+                for (let i = 0; i < res.length; i++) {
+                    retArr.push(res[i].department_id)
+                }
+            };
+            resolve(retArr)
+        });
+    });
 };
