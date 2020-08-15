@@ -2,7 +2,8 @@ const mysql = require("mysql");
 const inquirer = require("inquirer");
 const orm = require("./config/orm.js");
 var connection = require("./config/connection.js");
-const { start } = require("repl");
+
+//INQUIRER SCRIPT
 
 function startQuestions() {
     inquirer.prompt({
@@ -14,11 +15,17 @@ function startQuestions() {
     .then((answer) => {
         if (answer.start_choice === "ADD - NEW EMPLOYEE") {
             addNewEmployee()
-        } else if (answer.start_choice = "ADD - NEW ROLE") {
+        } else if (answer.start_choice === "ADD - NEW ROLE") {
+            console.log('into add new ROLE')
             addNewRole()
+        } else if (answer.start_choice === "ADD - NEW DEPT") {
+            console.log('into add new DEPT')
+            addNewDept()
         }
     });
 };
+
+//CLASSES
 
 class Employee {
     constructor(first_name, last_name, role_id, manager_id) {
@@ -60,6 +67,8 @@ class Department {
         });
     };
 };
+
+// ADD NEW RECORD FUNCTIONS
 
 async function addNewEmployee() {
     const roles =  await orm.selectFieldAndId(['title','id'], 'role');
@@ -119,6 +128,23 @@ async function addNewRole() {
     let newRole = new Role(resp.role_desc, resp.salary, resp.dept_id.slice(-1));
     newRole.addRoleDB()
 }
+
+async function addNewDept() {
+    let questionArr = [
+        {
+            type: "prompt",
+            name: "dept_name",
+            message: "What is the name of the Department you would like to add?"
+        }
+    ]
+    const resp = await inquirer.prompt(questionArr);
+    let newDept = new Department(resp.dept_name);
+    newDept.addDeptDB()
+}
+
+//VIEW RECORD FUNCTIONS
+
+
 startQuestions()
 
 // # Unit 12 MySQL Homework: Employee Tracker
