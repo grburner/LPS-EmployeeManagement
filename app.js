@@ -1,6 +1,7 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 const orm = require("./config/orm.js");
+var connection = require("./config/connection.js")
 
 function startQuestions() {
     inquirer.prompt({
@@ -15,14 +16,33 @@ function startQuestions() {
         };
     });
 };
+
+class Employee {
+    constructor(first_name, last_name, role_id, manager_id) {
+        this.first_name = first_name;
+        this.last_name = last_name;
+        this.manager_id = manager_id;
+        this.role_id = role_id;
+    };
+    addEmployeeDB() {
+        connection.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)",[this.first_name, this.last_name, this.role_id, this.manager_id],(err, res) => {
+            if (err) throw err;
+            console.log(res)
+        });
+    };
+};
+
     
 
 
 async function addNewEmployee() {
-    const roles =  await orm.selectTitles('title', 'role');
+    //const roles =  await orm.selectTitles('title', 'role');
+    const roles =  await orm.selectTitles(['title','id'], 'role');
     const managers = await orm.selectIds('id', 'employee');
-    Promise.all([roles, managers]).then((values) => {
-        inquirer.prompt(questionArr)
+    Promise.all([roles, managers]).then(async (values) => {
+        const resp = await inquirer.prompt(questionArr)
+        let newEmp = new Employee(resp.first_name, resp.last_name, resp.role_id, resp.manager_id);
+        newEmp.addEmployeeDB()
     })
     let questionArr = [
         {
@@ -49,7 +69,6 @@ async function addNewEmployee() {
         }
     ]
 }
-
 startQuestions()
 
 // # Unit 12 MySQL Homework: Employee Tracker
