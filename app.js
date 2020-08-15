@@ -1,7 +1,8 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 const orm = require("./config/orm.js");
-var connection = require("./config/connection.js")
+var connection = require("./config/connection.js");
+const { start } = require("repl");
 
 function startQuestions() {
     inquirer.prompt({
@@ -13,7 +14,9 @@ function startQuestions() {
     .then((answer) => {
         if (answer.start_choice === "ADD - NEW EMPLOYEE") {
             addNewEmployee()
-        };
+        } else if (answer.start_choice = "ADD - NEW ROLE") {
+            addNewRole()
+        }
     });
 };
 
@@ -32,16 +35,37 @@ class Employee {
     };
 };
 
-    
+class Role {
+    constructor(role_desc, salary, dept_id) {
+        this.role_desc = role_desc;
+        this.salary = salary;
+        this.dept_id = dept_id;
+    };
+    addRoleDB() {
+        connection.query("INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)",[this.role_desc, this.salary, this.dept_id],(err,res) => {
+            if (err) throw err;
+            console.log(res)
+        });
+    };
+};   
 
+class Department {
+    constructor(dept_name) {
+        this.dept_name = dept_name;
+    };
+    addDeptDB() {
+        connection.query("INSERT INTO department (name) VALUES (?)",[this.dept_name],(err,res) => {
+            if (err) throw err;
+            console.log(res)
+        });
+    };
+};
 
 async function addNewEmployee() {
-    //const roles =  await orm.selectTitles('title', 'role');
-    const roles =  await orm.selectTitles(['title','id'], 'role');
+    const roles =  await orm.selectFieldAndId(['title','id'], 'role');
     const managers = await orm.selectIds('id', 'employee');
     Promise.all([roles, managers]).then(async (values) => {
-        const resp = await inquirer.prompt(questionArr)
-        console.log(resp.role_id.slice(-1))
+        const resp = await inquirer.prompt(questionArr);
         let newEmp = new Employee(resp.first_name, resp.last_name, resp.role_id.slice(-1), resp.manager_id);
         newEmp.addEmployeeDB()
     })
@@ -69,6 +93,31 @@ async function addNewEmployee() {
             choices: managers
         }
     ]
+}
+
+async function addNewRole() {
+    const depts = await orm.selectFieldAndId(['name', 'id'], 'department');
+    let questionArr = [
+        {
+            type: "prompt",
+            name: "role_desc",
+            message: "What role would you like to add?",
+        },
+        {
+            type: "prompt",
+            name: "salary",
+            message: "What is the salary for this role?"
+        },
+        {
+            type: "list",
+            name: "dept_id",
+            message: "What is the department ID?",
+            choices: depts
+        }
+    ]
+    const resp = await inquirer.prompt(questionArr);
+    let newRole = new Role(resp.role_desc, resp.salary, resp.dept_id.slice(-1));
+    newRole.addRoleDB()
 }
 startQuestions()
 
