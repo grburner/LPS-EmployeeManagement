@@ -1,4 +1,5 @@
 var connection = require("./connection.js");
+const { resolve } = require("path");
 
 let orm = {
     selectFieldAndId: (selections, table) => {
@@ -33,12 +34,30 @@ let orm = {
             });
         })
     },
-    // selectDepts: (selections, table) => {
-    //     return new Promise(resolve, reject) => {
-    //         let retArr = []
-    //         let queryString = "SELECT ?? FROM ??"
-    //     }
-    // }
+    viewTable: (table) => {
+        return new Promise ((resolve, reject) => {
+            let queryString = 'SELECT * FROM ??'
+            connection.query(queryString, [table], (err,results) => {
+                if (err) {
+                    reject(new Error(err))
+                } else {
+                    resolve(results)
+                }
+            });
+        });
+    },
+    updateEmployee: (roleID, empID) => {
+        return new Promise ((resolve, reject) => {
+            let queryString = 'UPDATE employee SET role_id = ? WHERE employee.id = ?'
+            connection.query(queryString, [roleID, empID], (err, results) => {
+                if (err) {
+                    reject(new Error(err))
+                } else {
+                    resolve(results)
+                }
+            })
+        })
+    }
 };
 
 module.exports = orm;

@@ -2,6 +2,7 @@ const mysql = require("mysql");
 const inquirer = require("inquirer");
 const orm = require("./config/orm.js");
 var connection = require("./config/connection.js");
+const { start } = require("repl");
 
 //INQUIRER SCRIPT
 
@@ -16,11 +17,17 @@ function startQuestions() {
         if (answer.start_choice === "ADD - NEW EMPLOYEE") {
             addNewEmployee()
         } else if (answer.start_choice === "ADD - NEW ROLE") {
-            console.log('into add new ROLE')
             addNewRole()
         } else if (answer.start_choice === "ADD - NEW DEPT") {
-            console.log('into add new DEPT')
             addNewDept()
+        } else if (answer.start_choice === "VIEW - EMPLOYEES") {
+            viewTable('employee')
+        } else if (answer.start_choice === "VIEW - ROLES") {
+            viewTable('role')
+        } else if (answer.start_choice === "VIEW - DEPTS") {
+            viewTable('department')
+        } else if (answer.start_choice === "UPDATE - EMPLOYEE ROLES"){
+            updateEmpRole()
         }
     });
 };
@@ -35,9 +42,14 @@ class Employee {
         this.role_id = role_id;
     };
     addEmployeeDB() {
-        connection.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)",[this.first_name, this.last_name, this.role_id, this.manager_id],(err, res) => {
-            if (err) throw err;
-            console.log(res)
+        return new Promise((resolve, reject) => {
+            connection.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)",[this.first_name, this.last_name, this.role_id, this.manager_id],(err, res) => {
+                if (err) {
+                    reject (new Error(err))
+                } else {
+                    resolve(console.log(`${this.first_name} ${this.last_name} added!`))
+                }
+            });
         });
     };
 };
@@ -49,9 +61,14 @@ class Role {
         this.dept_id = dept_id;
     };
     addRoleDB() {
-        connection.query("INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)",[this.role_desc, this.salary, this.dept_id],(err,res) => {
-            if (err) throw err;
-            console.log(res)
+        return new Promise((resolve, reject) => {
+            connection.query("INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)",[this.role_desc, this.salary, this.dept_id],(err,res) => {
+                if (err) {
+                    reject (new Error(err))
+                } else {
+                    resolve(console.log(`${this.role_desc} added!`))
+                }
+            });
         });
     };
 };   
@@ -61,9 +78,14 @@ class Department {
         this.dept_name = dept_name;
     };
     addDeptDB() {
-        connection.query("INSERT INTO department (name) VALUES (?)",[this.dept_name],(err,res) => {
-            if (err) throw err;
-            console.log(res)
+        return new Promise((resolve, reject) => {
+            connection.query("INSERT INTO department (name) VALUES (?)",[this.dept_name],(err,res) => {
+                if (err) {
+                    reject (new Error(err))
+                } else {
+                    resolve(console.log(`${this.dept_name} added!`))
+                }
+            });
         });
     };
 };
@@ -76,7 +98,9 @@ async function addNewEmployee() {
     Promise.all([roles, managers]).then(async (values) => {
         const resp = await inquirer.prompt(questionArr);
         let newEmp = new Employee(resp.first_name, resp.last_name, resp.role_id.slice(-1), resp.manager_id);
-        newEmp.addEmployeeDB()
+        newEmp.addEmployeeDB().then(() => {
+            startQuestions()
+        })
     })
     let questionArr = [
         {
@@ -126,7 +150,9 @@ async function addNewRole() {
     ]
     const resp = await inquirer.prompt(questionArr);
     let newRole = new Role(resp.role_desc, resp.salary, resp.dept_id.slice(-1));
-    newRole.addRoleDB()
+    newRole.addRoleDB().then(() => {
+        startQuestions()
+    })
 }
 
 async function addNewDept() {
@@ -139,11 +165,45 @@ async function addNewDept() {
     ]
     const resp = await inquirer.prompt(questionArr);
     let newDept = new Department(resp.dept_name);
-    newDept.addDeptDB()
+    newDept.addDeptDB().then(() => {
+        startQuestions()
+    })
 }
 
 //VIEW RECORD FUNCTIONS
 
+async function viewTable(table) {
+    const resp = await orm.viewTable(table);
+    console.table(resp)
+    startQuestions()
+}
+
+//UPDATE FUNCTIONS
+
+async function updateEmpRole() {
+    const emps = await orm.selectFieldAndId(['first_name', 'id'], 'employee')
+    const roles = await orm.selectFieldAndId(['title', 'id'], 'role')
+    Promise.all([emps, roles]).then(async (values) => {
+        const resp = await inquirer.prompt(questionArr);
+        const results = await orm.updateEmployee(resp.role_update.slice(-1), resp.emp_update.slice(-1))
+        console.log(`Employee: ${resp.emp_update}: Role updated to: ${resp.role_update}`)
+        startQuestions()
+    })
+    let questionArr = [
+        {
+            type: "list",
+            name: "emp_update",
+            message: "What employee's role would you like to change?",
+            choices: emps
+        },
+        {
+            type: "list",
+            name: "role_update",
+            message: "What role would you like to switch to?",
+            choices: roles
+        }
+    ]
+}
 
 startQuestions()
 
