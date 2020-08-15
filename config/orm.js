@@ -10,7 +10,7 @@ let orm = {
                     reject(new Error(err))
                 } else {
                     for (let i = 0; i < results.length; i++) {
-                        retArr.push(results[i].id)
+                        retArr.push(`${results[i].title} ID: ${results[i].id}`)
                     }
                 };
                 resolve(retArr)

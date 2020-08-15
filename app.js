@@ -41,7 +41,8 @@ async function addNewEmployee() {
     const managers = await orm.selectIds('id', 'employee');
     Promise.all([roles, managers]).then(async (values) => {
         const resp = await inquirer.prompt(questionArr)
-        let newEmp = new Employee(resp.first_name, resp.last_name, resp.role_id, resp.manager_id);
+        console.log(resp.role_id.slice(-1))
+        let newEmp = new Employee(resp.first_name, resp.last_name, resp.role_id.slice(-1), resp.manager_id);
         newEmp.addEmployeeDB()
     })
     let questionArr = [
