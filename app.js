@@ -99,10 +99,10 @@ class Department {
 
 async function addNewEmployee() {
     const roles =  await orm.selectFieldAndId(['title','id'], 'role');
-    const managers = await orm.getManagers(['first_name', 'last_name'], 'employee');
+    const managers = await orm.getManagers(['first_name', 'last_name', 'employee.id'], 'employee');
     Promise.all([roles, managers]).then(async (values) => {
         const resp = await inquirer.prompt(questionArr);
-        let newEmp = new Employee(resp.first_name, resp.last_name, resp.role_id.slice(-1), resp.manager_id);
+        let newEmp = new Employee(resp.first_name, resp.last_name, resp.role_id.slice(-1), resp.manager_id.slice(-1));
         newEmp.addEmployeeDB().then(() => {
             startQuestions()
         })

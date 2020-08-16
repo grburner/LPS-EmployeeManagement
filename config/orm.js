@@ -77,10 +77,12 @@ let orm = {
                 if (err) {
                     reject(new Error(err))
                 } else {
+                    console.log(results)
                 for (let i = 0; i < results.length; i++) {
-                    retArr.push(`${results[i][selections[0]]} ${results[i][selections[1]]}`)
+                    retArr.push(`${results[i][selections[0]]} ${results[i][selections[1]]} ID: ${results[i]['id']}`)
                 }
             };
+                console.log(retArr)
                 resolve(retArr)
             });
         })
