@@ -32,7 +32,7 @@ function startQuestions() {
         } else if (answer.start_choice === "UPDATE - EMPLOYEE ROLES"){
             updateEmpRole()
         } else if (answer.start_choice === "END") {
-            return
+            connection.end()
         }
     });
 };
