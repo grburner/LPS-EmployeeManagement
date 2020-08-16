@@ -55,6 +55,29 @@ let orm = {
                 } else {
                     resolve(results)
                 }
+            });
+        });
+    },
+    viewFunction: (query) => {
+        return new Promise ((resolve, reject) => {
+            connection.query(query, (err, results) => {
+                if (err) {
+                    reject(new Error(err))
+                } else {
+                    resolve(results)
+                }
+            })
+        });
+    },
+    viewRoles: () => {
+        return new Promise ((resolve, reject) => {
+            let queryString = ''
+            connection.query(queryString, (err, results) => {
+                if (err) {
+                    reject(new Error(err))
+                } else {
+                    resolve(results)
+                }
             })
         })
     }

@@ -11,7 +11,7 @@ function startQuestions() {
         name: "start_choice",
         type: "list",
         message: "What would you like to do?",
-        choices: ["ADD - NEW EMPLOYEE", "ADD - NEW ROLE", "ADD - NEW DEPT", "VIEW - EMPLOYEES", "VIEW - ROLES", "VIEW - DEPTS", "UPDATE - EMPLOYEE ROLES"]
+        choices: ["ADD - NEW EMPLOYEE", "ADD - NEW ROLE", "ADD - NEW DEPT", "VIEW - EMPLOYEES", "VIEW - ROLES", "VIEW - DEPTS", "UPDATE - EMPLOYEE ROLES", "UPDATE - EMPLOYEE MANAGERS", "END"]
     })
     .then((answer) => {
         if (answer.start_choice === "ADD - NEW EMPLOYEE") {
@@ -21,13 +21,18 @@ function startQuestions() {
         } else if (answer.start_choice === "ADD - NEW DEPT") {
             addNewDept()
         } else if (answer.start_choice === "VIEW - EMPLOYEES") {
-            viewTable('employee')
+            const query = 'SELECT employee.first_name AS FirstName, employee.last_name AS LastName, role.title AS Title, department.name AS Department FROM employee INNER JOIN role ON employee.role_id = role.id INNER JOIN department ON role.department_id = department.id'
+            viewTable(query)
         } else if (answer.start_choice === "VIEW - ROLES") {
-            viewTable('role')
+            const query = 'SELECT employee.first_name AS FirstName, employee.last_name AS LastName, role.title AS Role, role.salary AS Salary FROM employee INNER JOIN role ON employee.role_id = role.id ORDER BY Role desc'
+            viewTable(query)
         } else if (answer.start_choice === "VIEW - DEPTS") {
-            viewTable('department')
+            const query = 'SELECT department.name AS Dept, employee.first_name AS FirstName, employee.last_name AS LastName, role.salary AS Salary FROM department INNER JOIN role ON department.id = role.department_id INNER JOIN employee ON role.id = employee.role_id ORDER BY Dept DESC'
+            viewTable(query)
         } else if (answer.start_choice === "UPDATE - EMPLOYEE ROLES"){
             updateEmpRole()
+        } else if (answer.start_choice === "END") {
+            return
         }
     });
 };
@@ -125,8 +130,8 @@ async function addNewEmployee() {
             message: "who will the employee report to?",
             choices: managers
         }
-    ]
-}
+    ];
+};
 
 async function addNewRole() {
     const depts = await orm.selectFieldAndId(['name', 'id'], 'department');
@@ -152,8 +157,8 @@ async function addNewRole() {
     let newRole = new Role(resp.role_desc, resp.salary, resp.dept_id.slice(-1));
     newRole.addRoleDB().then(() => {
         startQuestions()
-    })
-}
+    });
+};
 
 async function addNewDept() {
     let questionArr = [
@@ -162,32 +167,32 @@ async function addNewDept() {
             name: "dept_name",
             message: "What is the name of the Department you would like to add?"
         }
-    ]
+    ];
     const resp = await inquirer.prompt(questionArr);
     let newDept = new Department(resp.dept_name);
     newDept.addDeptDB().then(() => {
         startQuestions()
-    })
-}
+    });
+};
 
 //VIEW RECORD FUNCTIONS
 
-async function viewTable(table) {
-    const resp = await orm.viewTable(table);
-    console.table(resp)
-    startQuestions()
+async function viewTable(query) {
+    const resp = await orm.viewFunction(query);
+    console.table(resp);
+    startQuestions();
 }
 
 //UPDATE FUNCTIONS
 
 async function updateEmpRole() {
-    const emps = await orm.selectFieldAndId(['first_name', 'id'], 'employee')
-    const roles = await orm.selectFieldAndId(['title', 'id'], 'role')
+    const emps = await orm.selectFieldAndId(['first_name', 'id'], 'employee');
+    const roles = await orm.selectFieldAndId(['title', 'id'], 'role');
     Promise.all([emps, roles]).then(async (values) => {
         const resp = await inquirer.prompt(questionArr);
-        const results = await orm.updateEmployee(resp.role_update.slice(-1), resp.emp_update.slice(-1))
-        console.log(`Employee: ${resp.emp_update}: Role updated to: ${resp.role_update}`)
-        startQuestions()
+        const results = await orm.updateEmployee(resp.role_update.slice(-1), resp.emp_update.slice(-1));
+        console.log(`Employee: ${resp.emp_update}: Role updated to: ${resp.role_update}`);
+        startQuestions();
     })
     let questionArr = [
         {
@@ -202,8 +207,8 @@ async function updateEmpRole() {
             message: "What role would you like to switch to?",
             choices: roles
         }
-    ]
-}
+    ];
+};
 
 startQuestions()
 
