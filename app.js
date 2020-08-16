@@ -11,7 +11,7 @@ function startQuestions() {
         name: "start_choice",
         type: "list",
         message: "What would you like to do?",
-        choices: ["ADD - NEW EMPLOYEE", "ADD - NEW ROLE", "ADD - NEW DEPT", "VIEW - EMPLOYEES", "VIEW - ROLES", "VIEW - DEPTS", "UPDATE - EMPLOYEE ROLES", "UPDATE - EMPLOYEE MANAGERS", "END"]
+        choices: ["ADD - NEW EMPLOYEE", "ADD - NEW ROLE", "ADD - NEW DEPT", "VIEW - EMPLOYEES", "VIEW - ROLES", "VIEW - DEPTS", "UPDATE - EMPLOYEE ROLES", "END"]
     })
     .then((answer) => {
         if (answer.start_choice === "ADD - NEW EMPLOYEE") {
@@ -24,7 +24,7 @@ function startQuestions() {
             const query = 'SELECT employee.first_name AS FirstName, employee.last_name AS LastName, role.title AS Title, department.name AS Department FROM employee INNER JOIN role ON employee.role_id = role.id INNER JOIN department ON role.department_id = department.id'
             viewTable(query)
         } else if (answer.start_choice === "VIEW - ROLES") {
-            const query = 'SELECT employee.first_name AS FirstName, employee.last_name AS LastName, role.title AS Role, role.salary AS Salary FROM employee INNER JOIN role ON employee.role_id = role.id ORDER BY Role desc'
+            const query = 'SELECT role.title AS Role, employee.first_name AS FirstName, employee.last_name AS LastName, role.salary AS Salary FROM employee INNER JOIN role ON employee.role_id = role.id ORDER BY Role desc'
             viewTable(query)
         } else if (answer.start_choice === "VIEW - DEPTS") {
             const query = 'SELECT department.name AS Dept, employee.first_name AS FirstName, employee.last_name AS LastName, role.salary AS Salary FROM department INNER JOIN role ON department.id = role.department_id INNER JOIN employee ON role.id = employee.role_id ORDER BY Dept DESC'

@@ -69,18 +69,6 @@ let orm = {
             })
         });
     },
-    viewRoles: () => {
-        return new Promise ((resolve, reject) => {
-            let queryString = ''
-            connection.query(queryString, (err, results) => {
-                if (err) {
-                    reject(new Error(err))
-                } else {
-                    resolve(results)
-                }
-            })
-        })
-    },
     getManagers: (selections, table) => {
         return new Promise((resolve, reject) => {
             let retArr = []
