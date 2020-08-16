@@ -80,6 +80,22 @@ let orm = {
                 }
             })
         })
+    },
+    getManagers: (selections, table) => {
+        return new Promise((resolve, reject) => {
+            let retArr = []
+            let queryString = "SELECT ?? FROM ?? INNER JOIN role ON employee.role_id = role.id WHERE role.id = 1";
+            connection.query(queryString, [selections, table], (err, results) => {
+                if (err) {
+                    reject(new Error(err))
+                } else {
+                for (let i = 0; i < results.length; i++) {
+                    retArr.push(`${results[i][selections[0]]} ${results[i][selections[1]]}`)
+                }
+            };
+                resolve(retArr)
+            });
+        })
     }
 };
 

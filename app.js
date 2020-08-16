@@ -99,7 +99,7 @@ class Department {
 
 async function addNewEmployee() {
     const roles =  await orm.selectFieldAndId(['title','id'], 'role');
-    const managers = await orm.selectIds('id', 'employee');
+    const managers = await orm.getManagers(['first_name', 'last_name'], 'employee');
     Promise.all([roles, managers]).then(async (values) => {
         const resp = await inquirer.prompt(questionArr);
         let newEmp = new Employee(resp.first_name, resp.last_name, resp.role_id.slice(-1), resp.manager_id);
@@ -127,7 +127,7 @@ async function addNewEmployee() {
         {
             type: "list",
             name: "manager_id",
-            message: "who will the employee report to?",
+            message: "Who will the employee report to?",
             choices: managers
         }
     ];
