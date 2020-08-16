@@ -29,7 +29,13 @@ A simple MYSQL database with functionality to add, update, and delete records.
 <a name="inst"></a>
 ## 2. Installation Instructions
 
- Run the schema.sql and seeds.sql file in Workbench to set up the database. Then you can run app.js in Node to go through the inquirer prompts and work with the data.
+ Run the schema.sql and seeds.sql file in Workbench to set up the database. Install:
+ 
+ ```
+npm mysql & npm inquirer
+```
+ 
+ Then you can run app.js in Node to go through the inquirer prompts and work with the data.
 
 <a name="use"></a>
 ## 3. Usage Information
